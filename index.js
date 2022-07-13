@@ -11,15 +11,11 @@ const {
   getFirestore,
   collection,
   getDocs,
+  addDoc,
 } = require('firebase/firestore/lite');
-
 const PORT = 3000;
 
 // Firebase Database Storage
-// Follow this pattern to import other Firebase services
-// import { } from 'firebase/<service>';
-
-// TODO: Replace the following with your app's Firebase project configuration
 const firebaseConfig = {
   apiKey: 'AIzaSyB0q0zOp9riKXtKPcMn_wpaCAWZbJcXNyQ',
   authDomain: 'pca-intergration.firebaseapp.com',
@@ -33,8 +29,20 @@ const firebaseConfig = {
 const appFirebase = initializeApp(firebaseConfig);
 const db = getFirestore(appFirebase);
 
-// Get a list of cities from your database
-async function getCities(db) {
+const storeToken = async (userId, userToken) => {
+  try {
+    const docRef = await addDoc(collection(db, 'users'), {
+      userId: userId,
+      userToken: userToken,
+    });
+    console.log('Document written with ID: ', docRef.id);
+  } catch (e) {
+    console.error('Error adding document: ', e);
+  }
+};
+
+// saved refresh token
+async function getToken(db) {
   const citiesCol = collection(db, 'users');
   const citySnapshot = await getDocs(citiesCol);
   const cityList = citySnapshot.docs.map((doc) => doc.data());
@@ -42,7 +50,7 @@ async function getCities(db) {
   return cityList;
 }
 
-getCities(db);
+getToken(db);
 
 const refreshTokenStore = {};
 const accessTokenCache = new NodeCache({ deleteOnExpire: true });
@@ -53,14 +61,6 @@ if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
 
 //===========================================================================//
 //  HUBSPOT APP CONFIGURATION
-//
-//  All the following values must match configuration settings in your app.
-//  They will be used to build the OAuth URL, which users visit to begin
-//  installing. If they don't match your app's configuration, users will
-//  see an error page.
-
-// Replace the following with the values from your app auth config,
-// or set them as environment variables before running.
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
@@ -172,6 +172,7 @@ const exchangeForTokens = async (userId, exchangeProof) => {
     );
 
     console.log('       > Received an access token and refresh token');
+    storeToken(userId, tokens.refresh_token);
     return tokens.access_token;
   } catch (e) {
     console.error(
@@ -295,7 +296,7 @@ app.get('/', async (req, res) => {
     const objects = await getCustomObjects(accessToken);
     res.write(`<h4>Access token: ${accessToken}</h4>`);
     displayContactName(res, contact);
-    console.log(objects);
+    // console.log(objects);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
   }
