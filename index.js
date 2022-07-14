@@ -12,6 +12,8 @@ const {
   collection,
   getDocs,
   addDoc,
+  doc,
+  getDoc,
 } = require('firebase/firestore/lite');
 const PORT = 3000;
 
@@ -41,16 +43,27 @@ const storeToken = async (userId, userToken) => {
   }
 };
 
-// saved refresh token
-async function getToken(db) {
-  const citiesCol = collection(db, 'users');
-  const citySnapshot = await getDocs(citiesCol);
-  const cityList = citySnapshot.docs.map((doc) => doc.data());
-  console.log(cityList);
-  return cityList;
+// retrieve refresh token
+async function getToken(db, userId) {
+  const userCol = collection(db, 'users');
+  const userSnapshot = await getDocs(userCol);
+  const userList = userSnapshot.docs.map((doc) => doc.data());
+  console.log(userList);
+
+  const docRef = doc(db, 'users', userId);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    console.log('Document data:', docSnap.data());
+  } else {
+    // doc.data() will be undefined in this case
+    console.log('No such document!');
+  }
+
+  return userList;
 }
 
-getToken(db);
+getToken(db, 'userId');
 
 const refreshTokenStore = {};
 const accessTokenCache = new NodeCache({ deleteOnExpire: true });
@@ -211,6 +224,7 @@ const isAuthorized = (userId) => {
 //   Using an Access Token to Query the HubSpot API   //
 //====================================================//
 
+// Get Contacts
 const getContact = async (accessToken) => {
   console.log('');
   console.log(
@@ -253,7 +267,7 @@ const resContacts = async (accessToken) => {
   return data;
 };
 
-//
+// Get custom objects from HubSpot
 const getCustomObjects = async (accessToken) => {
   const objects = 'http://api.hubspot.com/crm/v3/schemas';
   const headers = {
@@ -274,12 +288,6 @@ const getCustomObjects = async (accessToken) => {
 //========================================//
 
 const displayContactName = (res, contact) => {
-  // if (contact.status === 'error') {
-  //   res.write(
-  //     `<p>Unable to retrieve contact! Error Message: ${contact.message}</p>`
-  //   );
-  //   return;
-  // }
   for (val of contact) {
     res.write(
       `<p>Contact name: ${val.properties.firstname} ${val.properties.lastname}</p>`
@@ -295,6 +303,7 @@ app.get('/', async (req, res) => {
     const contact = await resContacts(accessToken);
     const objects = await getCustomObjects(accessToken);
     res.write(`<h4>Access token: ${accessToken}</h4>`);
+
     displayContactName(res, contact);
     // console.log(objects);
   } else {
