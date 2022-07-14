@@ -17,7 +17,8 @@ const {
 } = require('firebase/firestore/lite');
 const PORT = 3000;
 
-// Firebase Database Storage
+// =========== CODE TO STORE THE USER ACCESS IN FIREBASE ========== //
+
 const firebaseConfig = {
   apiKey: 'AIzaSyB0q0zOp9riKXtKPcMn_wpaCAWZbJcXNyQ',
   authDomain: 'pca-intergration.firebaseapp.com',
@@ -63,7 +64,7 @@ async function getToken(db, userId) {
   return userList;
 }
 
-getToken(db, 'userId');
+// ============================================================================//
 
 const refreshTokenStore = {};
 const accessTokenCache = new NodeCache({ deleteOnExpire: true });
@@ -297,7 +298,7 @@ const displayContactName = (res, contact) => {
 
 app.get('/', async (req, res) => {
   res.setHeader('Content-Type', 'text/html');
-  res.write(`<h2>HubSpot OAuth 2.0 Quickstart App</h2>`);
+  res.write(`<h2>HubSpot OAuth 2.0 PCA Services App</h2>`);
   if (isAuthorized(req.sessionID)) {
     const accessToken = await getAccessToken(req.sessionID);
     const contact = await resContacts(accessToken);
