@@ -47,8 +47,6 @@ const storeToken = async (userToken) => {
         const obj = doc.data();
         isExist = true;
       }
-      // doc.data() is never undefined for query doc snapshots
-      // console.log(doc.id, ' => ', doc.data());
     });
 
     if (isExist) {
