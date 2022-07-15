@@ -14,6 +14,8 @@ const {
   addDoc,
   doc,
   getDoc,
+  where,
+  query,
 } = require('firebase/firestore/lite');
 const PORT = 3000;
 
@@ -32,11 +34,29 @@ const firebaseConfig = {
 const appFirebase = initializeApp(firebaseConfig);
 const db = getFirestore(appFirebase);
 
-const storeToken = async (userId, userToken) => {
+const storeToken = async (userToken) => {
+  let isExist = false;
   try {
+    const q = query(
+      collection(db, 'users'),
+      where('userToken', '==', userToken)
+    );
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      if (doc.exists(userToken)) {
+        const obj = doc.data();
+        isExist = true;
+      }
+      // doc.data() is never undefined for query doc snapshots
+      // console.log(doc.id, ' => ', doc.data());
+    });
+
+    if (isExist) {
+      return;
+    }
+
     const docRef = await addDoc(collection(db, 'users'), {
-      userId: userId,
-      userToken: userToken,
+      userToken,
     });
     console.log('Document written with ID: ', docRef.id);
   } catch (e) {
@@ -44,25 +64,22 @@ const storeToken = async (userId, userToken) => {
   }
 };
 
-// retrieve refresh token
-async function getToken(db, userId) {
-  const userCol = collection(db, 'users');
-  const userSnapshot = await getDocs(userCol);
-  const userList = userSnapshot.docs.map((doc) => doc.data());
-  console.log(userList);
-
-  const docRef = doc(db, 'users', userId);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    console.log('Document data:', docSnap.data());
-  } else {
-    // doc.data() will be undefined in this case
-    console.log('No such document!');
-  }
-
-  return userList;
-}
+// getRefreshToken
+const getToken = async (userToken) => {
+  let tokenId;
+  const q = query(collection(db, 'users'), where('userToken', '==', userToken));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    if (doc.exists(userToken)) {
+      const obj = doc.data();
+      tokenId = obj.userToken;
+    }
+    // doc.data() is never undefined for query doc snapshots
+    // console.log(doc.id, ' => ', doc.data());
+  });
+  console.log(tokenId);
+  return tokenId;
+};
 
 // ============================================================================//
 
@@ -104,8 +121,10 @@ app.use(
 //================================//
 
 // Step 1
+
 // Build the authorization URL to redirect a user
 // to when they choose to install the app
+
 const authUrl =
   'https://app.hubspot.com/oauth/authorize' +
   `?client_id=${encodeURIComponent(CLIENT_ID)}` + // app's client ID
@@ -186,7 +205,8 @@ const exchangeForTokens = async (userId, exchangeProof) => {
     );
 
     console.log('       > Received an access token and refresh token');
-    storeToken(userId, tokens.refresh_token);
+    storeToken(refreshTokenStore[userId]);
+    getToken(refreshTokenStore[userId]);
     return tokens.access_token;
   } catch (e) {
     console.error(
