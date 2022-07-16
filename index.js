@@ -14,9 +14,11 @@ const {
   addDoc,
   doc,
   getDoc,
+  setDoc,
   where,
   query,
 } = require('firebase/firestore/lite');
+const { get } = require('request');
 const PORT = 3000;
 
 // =========== CODE TO STORE THE USER ACCESS IN FIREBASE ========== //
@@ -35,24 +37,7 @@ const appFirebase = initializeApp(firebaseConfig);
 const db = getFirestore(appFirebase);
 
 const storeToken = async (userToken) => {
-  let isExist = false;
   try {
-    const q = query(
-      collection(db, 'users'),
-      where('userToken', '==', userToken)
-    );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      if (doc.exists(userToken)) {
-        const obj = doc.data();
-        isExist = true;
-      }
-    });
-
-    if (isExist) {
-      return;
-    }
-
     const docRef = await addDoc(collection(db, 'users'), {
       userToken,
     });
@@ -62,21 +47,64 @@ const storeToken = async (userToken) => {
   }
 };
 
-// getRefreshToken
-const getToken = async (userToken) => {
-  let tokenId;
-  const q = query(collection(db, 'users'), where('userToken', '==', userToken));
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    if (doc.exists(userToken)) {
-      const obj = doc.data();
-      tokenId = obj.userToken;
+// // getRefreshToken
+// const verifyToken = async (userToken) => {
+//   let refreshToken;
+//   const q = query(collection(db, 'users'), where('userToken', '==', userToken));
+//   const querySnapshot = await getDocs(q);
+//   querySnapshot.forEach((doc) => {
+//     if (doc.exists(userToken)) {
+//       const obj = doc.data();
+//       console.log('This Guy is: ', obj.userToken);
+//       refreshToken = obj.userToken;
+//     }
+//     // doc.data() is never undefined for query doc snapshots
+//     // console.log(doc.id, ' => ', doc.data());
+//   });
+//   // console.log(refreshToken);
+//   return refreshToken;
+// };
+
+const persistToken = async (token) => {
+  try {
+    let isExist = false;
+    const q = query(collection(db, 'users'), where('token', '==', token));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      if (doc.exists(token)) {
+        const obj = doc.data();
+        console.log('This token does exist: ', token);
+        isExist = true;
+      }
+    });
+
+    if (isExist) {
+      return;
     }
-    // doc.data() is never undefined for query doc snapshots
-    // console.log(doc.id, ' => ', doc.data());
-  });
-  console.log(tokenId);
-  return tokenId;
+
+    await setDoc(doc(db, 'users', 'tokens'), {
+      token,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const getTokenIfExist = async () => {
+  let refreshToken;
+  const docRef = doc(db, 'users', 'tokens');
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const obj = docSnap.data();
+    refreshToken = obj.token;
+    console.log('This is the refreshToken: ', refreshToken);
+    console.log('Document data:', docSnap.data());
+  } else {
+    console.log('No such document!');
+  }
+
+  return refreshToken;
 };
 
 // ============================================================================//
@@ -204,7 +232,8 @@ const exchangeForTokens = async (userId, exchangeProof) => {
 
     console.log('       > Received an access token and refresh token');
     storeToken(refreshTokenStore[userId]);
-    getToken(refreshTokenStore[userId]);
+    persistToken(refreshTokenStore[userId]);
+    // verifyToken(refreshTokenStore[userId]);
     return tokens.access_token;
   } catch (e) {
     console.error(
@@ -220,7 +249,7 @@ const refreshAccessToken = async (userId) => {
     client_id: CLIENT_ID,
     client_secret: CLIENT_SECRET,
     redirect_uri: REDIRECT_URI,
-    refresh_token: refreshTokenStore[userId],
+    refresh_token: refreshTokenStore[userId] || (await getTokenIfExist()),
   };
   return await exchangeForTokens(userId, refreshTokenProof);
 };
@@ -235,13 +264,16 @@ const getAccessToken = async (userId) => {
   return accessTokenCache.get(userId);
 };
 
-const isAuthorized = (userId) => {
-  return refreshTokenStore[userId] ? true : false;
+const isAuthorized = async (userId) => {
+  let refreshToken = await getTokenIfExist();
+  console.log('isAuthorized refreshToken : ', refreshToken);
+  // return refreshTokenStore[userId] ? true : false;
+  return refreshToken ? true : false;
 };
 
-//====================================================//
-//   Using an Access Token to Query the HubSpot API   //
-//====================================================//
+// ==================================================== //
+//    Using an Access Token to Query the HubSpot API    //
+// ==================================================== //
 
 // Get Contacts
 const getContact = async (accessToken) => {
@@ -317,7 +349,8 @@ const displayContactName = (res, contact) => {
 app.get('/', async (req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.write(`<h2>HubSpot OAuth 2.0 PCA Services App</h2>`);
-  if (isAuthorized(req.sessionID)) {
+  let authorized = await isAuthorized(req.sessionID);
+  if (authorized) {
     const accessToken = await getAccessToken(req.sessionID);
     const contact = await resContacts(accessToken);
     const objects = await getCustomObjects(accessToken);
