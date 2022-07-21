@@ -1,3 +1,4 @@
+const util = require('util');
 const {
   resContacts,
   getCustomObjects,
@@ -25,9 +26,17 @@ exports.renderView = async (req, res) => {
     const contact = await resContacts(accessToken);
     const objects = await getCustomObjects(accessToken);
     res.write(`<h4>Access token: ${accessToken}</h4>`);
-
-    displayContactName(res, contact);
     // console.log(objects);
+    let propertyNames = [];
+    for (let obj of objects) {
+      propertyNames.push(obj.name);
+      // console.log(util.inspect(objects, false, null, true /* enable colors */));
+    }
+    const obj1 = Object.assign({}, propertyNames);
+    console.log(propertyNames[41]);
+    // console.log(util.inspect(objects, false, null, true /* enable colors */));
+    // console.log(JSON.stringify(objects, null, 2));
+    displayContactName(res, contact);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
   }

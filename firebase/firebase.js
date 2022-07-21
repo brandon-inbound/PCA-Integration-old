@@ -34,7 +34,6 @@ exports.persistToken = async (token) => {
     querySnapshot.forEach((doc) => {
       if (doc.exists(token)) {
         const obj = doc.data();
-        console.log('This token does exist: ', token);
         isExist = true;
       }
     });
@@ -60,8 +59,6 @@ exports.getTokenIfExist = async () => {
   if (docSnap.exists()) {
     const obj = docSnap.data();
     refreshToken = obj.token;
-    console.log('This is the refreshToken: ', refreshToken);
-    console.log('Document data:', docSnap.data());
   } else {
     console.log('No such document!');
   }
