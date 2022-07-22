@@ -1,13 +1,18 @@
+const hubspot = require('@hubspot/api-client');
+let hubspotClient;
+
 const util = require('util');
 const {
   resContacts,
   getCustomObjects,
+  getVehicleObject,
+  updateObjectProperty,
 } = require('../api-queries/huspots-queries');
 const { isAuthorized, getAccessToken } = require('../oauth/oauth');
 
-//========================================//
-//   Displaying information to the user   //
-//========================================//
+//======================================================//
+//   Displaying test information info to the browser   //
+//======================================================//
 
 const displayContactName = (res, contact) => {
   for (val of contact) {
@@ -25,17 +30,10 @@ exports.renderView = async (req, res) => {
     const accessToken = await getAccessToken(req.sessionID);
     const contact = await resContacts(accessToken);
     const objects = await getCustomObjects(accessToken);
+    hubspotClient = new hubspot.Client({ accessToken: `${accessToken}` });
+    getVehicleObject(hubspotClient);
+    // updateObjectProperty(hubspotClient);
     res.write(`<h4>Access token: ${accessToken}</h4>`);
-    // console.log(objects);
-    let propertyNames = [];
-    for (let obj of objects) {
-      propertyNames.push(obj.name);
-      // console.log(util.inspect(objects, false, null, true /* enable colors */));
-    }
-    const obj1 = Object.assign({}, propertyNames);
-    console.log(propertyNames[41]);
-    // console.log(util.inspect(objects, false, null, true /* enable colors */));
-    // console.log(JSON.stringify(objects, null, 2));
     displayContactName(res, contact);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
