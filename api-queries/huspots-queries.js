@@ -138,10 +138,9 @@ exports.createProperty = async (hubspotClient) => {
   }
 };
 
-// Get property values
 exports.readProperties = async (accessToken) => {
   const url =
-    'http://api.hubspot.com/crm/v3/objects/2-106219468/331593182?properties';
+    'http://api.hubspot.com/crm/v3/objects/2-106219468/331593182?properties=date_de_debut_du_contrat';
   const headers = {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
