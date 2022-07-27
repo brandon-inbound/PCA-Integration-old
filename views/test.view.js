@@ -7,6 +7,11 @@ const {
   getCustomObjects,
   getVehicleObject,
   updateObjectProperty,
+  createProperty,
+  readProperties,
+  readPropertiesAxios,
+  getProperties,
+  getObjectsAPI,
 } = require('../api-queries/huspots-queries');
 const { isAuthorized, getAccessToken } = require('../oauth/oauth');
 
@@ -29,12 +34,20 @@ exports.renderView = async (req, res) => {
   if (authorized) {
     const accessToken = await getAccessToken(req.sessionID);
     const contact = await resContacts(accessToken);
+
     const objects = await getCustomObjects(accessToken);
     hubspotClient = new hubspot.Client({ accessToken: `${accessToken}` });
-    getVehicleObject(hubspotClient);
+    const propRead = await readProperties(accessToken);
+    // console.log(util.inspect(objects, false, null, true /* enable colors */));
+    console.log(util.inspect(propRead, false, null, true /* enable colors */));
+    // console.log(util.inspect(contact, false, null, true /* enable colors */));
+    // getVehicleObject(hubspotClient);
     // updateObjectProperty(hubspotClient);
-    res.write(`<h4>Access token: ${accessToken}</h4>`);
-    displayContactName(res, contact);
+    // createProperty(hubspotClient);
+    // getProperties(hubspotClient);
+    // getObjectsAPI(hubspotClient);
+    // res.write(`<h4>Access token: ${accessToken}</h4>`);
+    // displayContactName(res, contact);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
   }
