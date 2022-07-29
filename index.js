@@ -3,7 +3,6 @@ const express = require('express');
 const request = require('request-promise-native');
 const NodeCache = require('node-cache');
 const session = require('express-session');
-const http = require('http');
 const opn = require('open');
 const app = express();
 const { renderView } = require('./views/test.view');

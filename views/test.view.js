@@ -35,23 +35,12 @@ exports.renderView = async (req, res) => {
   let authorized = await isAuthorized(req.sessionID);
   if (authorized) {
     const accessToken = await getAccessToken(req.sessionID);
+    hubspotClient = new hubspot.Client({ accessToken: `${accessToken}` });
     const contact = await resContacts(accessToken);
 
-    const objects = await getCustomObjects(accessToken);
-    hubspotClient = new hubspot.Client({ accessToken: `${accessToken}` });
-    const propRead = await readProperties(accessToken);
-    // console.log(util.inspect(objects, false, null, true /* enable colors */));
-    // console.log(util.inspect(propRead, false, null, true /* enable colors */));
-    // console.log(util.inspect(contact, false, null, true /* enable colors */));
-    // getVehicleObject(hubspotClient);
-    // updateObjectProperty(hubspotClient);
-    // getProperties(hubspotClient);
-    // getObjectsAPI(hubspotClient);
-    // res.write(`<h4>Access token: ${accessToken}</h4>`);
     // displayContactName(res, contact);
-    // readPropertiesII(accessToken);
+    readProperties(accessToken);
     updateProperty(accessToken);
-    // updateProperties(hubspotClient);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
   }
