@@ -7,11 +7,13 @@ const {
   getCustomObjects,
   getVehicleObject,
   updateObjectProperty,
-  createProperty,
   readProperties,
   readPropertiesAxios,
   getProperties,
   getObjectsAPI,
+  updateProperty,
+  readPropertiesII,
+  updateProperties,
 } = require('../api-queries/huspots-queries');
 const { isAuthorized, getAccessToken } = require('../oauth/oauth');
 
@@ -28,8 +30,8 @@ const displayContactName = (res, contact) => {
 };
 
 exports.renderView = async (req, res) => {
-  res.setHeader('Content-Type', 'text/html');
-  res.write(`<h2>HubSpot OAuth 2.0 PCA Services App</h2>`);
+  // res.setHeader('Content-Type', 'text/html');
+  // res.write(`<h2>HubSpot OAuth 2.0 PCA Services App</h2>`);
   let authorized = await isAuthorized(req.sessionID);
   if (authorized) {
     const accessToken = await getAccessToken(req.sessionID);
@@ -39,15 +41,17 @@ exports.renderView = async (req, res) => {
     hubspotClient = new hubspot.Client({ accessToken: `${accessToken}` });
     const propRead = await readProperties(accessToken);
     // console.log(util.inspect(objects, false, null, true /* enable colors */));
-    console.log(util.inspect(propRead, false, null, true /* enable colors */));
+    // console.log(util.inspect(propRead, false, null, true /* enable colors */));
     // console.log(util.inspect(contact, false, null, true /* enable colors */));
     // getVehicleObject(hubspotClient);
     // updateObjectProperty(hubspotClient);
-    // createProperty(hubspotClient);
     // getProperties(hubspotClient);
     // getObjectsAPI(hubspotClient);
     // res.write(`<h4>Access token: ${accessToken}</h4>`);
     // displayContactName(res, contact);
+    // readPropertiesII(accessToken);
+    updateProperty(accessToken);
+    // updateProperties(hubspotClient);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
   }

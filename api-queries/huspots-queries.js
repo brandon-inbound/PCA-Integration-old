@@ -34,113 +34,9 @@ exports.getCustomObjects = async (accessToken) => {
   }
 };
 
-exports.getVehicleObject = async (hubspotClient) => {
-  const objectType = 'p25582274_Vehicule';
-  const archived = false;
-
-  try {
-    const apiResponse = await hubspotClient.crm.properties.coreApi.getAll(
-      objectType,
-      archived
-    );
-    console.log(
-      util.inspect(apiResponse, false, null, true /* enable colors */)
-    );
-  } catch (e) {
-    e.message === 'HTTP request failed'
-      ? console.error(JSON.stringify(e.response, null, 2))
-      : console.error(e);
-  }
-};
-
-exports.getProperties = async (hubspotClient) => {
-  const objectType = '2-106219468';
-  const archived = false;
-
-  try {
-    const apiResponse = await hubspotClient.crm.properties.coreApi.getAll(
-      objectType,
-      archived
-    );
-    console.log(
-      util.inspect(apiResponse, false, null, true /* enable colors */)
-    );
-  } catch (e) {
-    e.message === 'HTTP request failed'
-      ? console.error(JSON.stringify(e.response, null, 2))
-      : console.error(e);
-  }
-};
-
-const PropertyUpdate = {
-  label: 'Calculated Update',
-  type: 'number',
-  fieldType: 'calculation_equation',
-  groupName: 'vehicule_information',
-  options: [],
-  displayOrder: -1,
-  hidden: false,
-  formField: false,
-  calculationFormula: '100 - 20',
-};
-// calculationFormula: '("releve_kilometrage") * ("avancement_du_contrat")',
-const objectType = 'p25582274_Vehicule';
-const propertyName = 'calculation_test';
-
-exports.updateObjectProperty = async (hubspotClient) => {
-  try {
-    const apiResponse = await hubspotClient.crm.properties.coreApi.update(
-      objectType,
-      propertyName,
-      PropertyUpdate
-    );
-    console.log(JSON.stringify(apiResponse.body, null, 2));
-    console.log(
-      util.inspect(apiResponse, false, null, true /* enable colors */)
-    );
-  } catch (e) {
-    e.message === 'HTTP request failed'
-      ? console.error(JSON.stringify(e.response, null, 2))
-      : console.error(e);
-  }
-};
-
-exports.createProperty = async (hubspotClient) => {
-  const PropertyCreate = {
-    name: 'hello',
-    label: 'Hello',
-    type: 'number',
-    fieldType: 'calculation_equation',
-    groupName: 'vehicule_information',
-    options: [],
-    displayOrder: -1,
-    hasUniqueValue: false,
-    hidden: false,
-    formField: false,
-    calculationFormula: '100 - 20',
-  };
-
-  const objectType = 'p25582274_Vehicule';
-
-  try {
-    const apiResponse = await hubspotClient.crm.properties.coreApi.create(
-      objectType,
-      PropertyCreate
-    );
-    // console.log(JSON.stringify(apiResponse.body, null, 2));
-    console.log(
-      util.inspect(apiResponse, false, null, true /* enable colors */)
-    );
-  } catch (e) {
-    e.message === 'HTTP request failed'
-      ? console.error(JSON.stringify(e.response, null, 2))
-      : console.error(e);
-  }
-};
-
 exports.readProperties = async (accessToken) => {
   const url =
-    'http://api.hubspot.com/crm/v3/objects/2-106219468/331593182?properties=date_de_debut_du_contrat';
+    'http://api.hubspot.com/crm/v3/objects/2-106219468/331593182?properties=avancement_du_contrat';
   const headers = {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
@@ -148,6 +44,32 @@ exports.readProperties = async (accessToken) => {
   try {
     const response = await axios.get(url, { headers });
     const data = response.data;
+    return data;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+exports.updateProperty = async (accessToken) => {
+  let payload = JSON.stringify({
+    properties: {
+      avancement_du_contrat: '66',
+    },
+  });
+  const config = {
+    method: 'patch',
+    url: 'http://api.hubspot.com/crm/v3/objects/2-106219468/331593182',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    data: payload,
+  };
+
+  try {
+    const response = await axios(config);
+    const data = response.data;
+    console.log(data);
     return data;
   } catch (e) {
     console.log(e);

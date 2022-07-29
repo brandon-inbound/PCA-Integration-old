@@ -3,6 +3,7 @@ const express = require('express');
 const request = require('request-promise-native');
 const NodeCache = require('node-cache');
 const session = require('express-session');
+const http = require('http');
 const opn = require('open');
 const app = express();
 const { renderView } = require('./views/test.view');
@@ -24,8 +25,8 @@ app.use(
 app.get('/', renderView);
 
 app.get('/error', (req, res) => {
-  res.setHeader('Content-Type', 'text/html');
-  res.write(`<h4>Error: ${req.query.msg}</h4>`);
+  // res.setHeader('Content-Type', 'text/html');
+  // res.write(`<h4>Error: ${req.query.msg}</h4>`);
   res.end();
 });
 
