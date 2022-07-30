@@ -14,6 +14,8 @@ const {
   updateProperty,
   readPropertiesII,
   updateProperties,
+  testProperties,
+  queryObjects,
 } = require('../api-queries/huspots-queries');
 const { isAuthorized, getAccessToken } = require('../oauth/oauth');
 
@@ -39,8 +41,9 @@ exports.renderView = async (req, res) => {
     const contact = await resContacts(accessToken);
 
     // displayContactName(res, contact);
-    readProperties(accessToken);
-    // updateProperty(accessToken);
+    // readProperties(accessToken);
+    // testProperties(accessToken);
+    queryObjects(hubspotClient, accessToken);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
   }
