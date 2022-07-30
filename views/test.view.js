@@ -40,7 +40,7 @@ exports.renderView = async (req, res) => {
 
     // displayContactName(res, contact);
     readProperties(accessToken);
-    updateProperty(accessToken);
+    // updateProperty(accessToken);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
   }
