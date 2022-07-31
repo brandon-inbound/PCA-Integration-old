@@ -5,7 +5,7 @@ const cron = require('node-cron');
 const opn = require('open');
 const app = express();
 const { renderView } = require('./views/test.view');
-const PORT = 3000;
+const port = process.env.PORT || 3000;
 
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
   throw new Error('Missing CLIENT_ID or CLIENT_SECRET environment variable.');
@@ -28,8 +28,8 @@ app.get('/error', (req, res) => {
   res.end();
 });
 
-app.listen(PORT, () =>
-  console.log(`=== Starting your app on http://localhost:${PORT} ===`)
+app.listen(port, () =>
+  console.log(`=== Starting your app on http://localhost:${port} ===`)
 );
 
-cron.schedule('*/2 * * * *', () => opn(`http://localhost:${PORT}`));
+cron.schedule('*/2 * * * *', () => opn(`http://localhost:${port}`));

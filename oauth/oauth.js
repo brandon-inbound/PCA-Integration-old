@@ -4,7 +4,7 @@ const request = require('request-promise-native');
 const NodeCache = require('node-cache');
 const app = express();
 const { persistToken, getTokenIfExist } = require('../firebase/firebase');
-const PORT = 3000;
+const port = process.env.PORT || 3000;
 
 const refreshTokenStore = {};
 const accessTokenCache = new NodeCache({ deleteOnExpire: true });
@@ -26,7 +26,7 @@ if (process.env.SCOPE) {
 }
 
 // On successful install, users will be redirected to /oauth-callback
-const REDIRECT_URI = `http://localhost:${PORT}/oauth-callback`;
+const REDIRECT_URI = `http://localhost:${port}/oauth-callback`;
 
 //===========================================================================//
 
