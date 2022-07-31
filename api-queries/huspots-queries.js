@@ -18,7 +18,7 @@ exports.resContacts = async (accessToken) => {
   return data;
 };
 
-exports.queryObjects = async (hubspotClient, accessToken) => {
+exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
   const objectType = '2-106219468';
   const limit = 10;
   const after = undefined;
@@ -47,13 +47,13 @@ exports.queryObjects = async (hubspotClient, accessToken) => {
 
     // All Operations will take place inside the for loop
     for (res of apiResponse.results) {
-      console.log(res.properties);
-      let contractProgress = '';
+      // console.log(res.properties);
       const getProgress = (startDate, endDate) => {
+        let progress = '';
         const total = +endDate - +startDate;
         const elaps = Date.now() - startDate;
-        contractProgress = Math.round((elaps / total) * 100) + '%';
-        return contractProgress;
+        progress = Math.round((elaps / total) * 100) + '%';
+        return progress;
       };
 
       let contractStartDate = new Date(res.properties.date_de_debut_du_contrat);
@@ -64,11 +64,12 @@ exports.queryObjects = async (hubspotClient, accessToken) => {
       let mileageStatement = res.properties.releve_kilometrage;
       let totalPlannedMileage = res.properties.kilometrage_total_prevu_contrat;
       let contractDuration = parseFloat(res.properties.duree_du_contrat);
-      // console.log('Start Month: ', contractStartDate);
-      // console.log('End Month: ', contractEndDate);
-      // console.log(getProgress(contractStartDate, contractEndDate));
 
-      // Get months difference function
+      // Contract Progress
+      const contractProgress = getProgress(contractStartDate, contractEndDate);
+      console.log('Contract Progress: ', contractProgress);
+
+      // Get month difference function
       const getMonthDifference = (startDate, endDate) => {
         return (
           endDate.getMonth() -
@@ -86,7 +87,7 @@ exports.queryObjects = async (hubspotClient, accessToken) => {
       let projectedKMs =
         mileageStatement *
         getMonthDifference(mileageStatementDate, contractEndDate);
-      console.log('This the Projected Kilometers: ', projectedKMs);
+      console.log('This is the Projected Kilometers: ', projectedKMs);
 
       // Mileage gap between Contract KMs and Projected KMs
       const calcMileageGap = (projectedKMs / totalPlannedMileage) * 100;
@@ -212,7 +213,6 @@ const updateProperty = async (
   try {
     const response = await axios(config);
     const data = response.data;
-    // console.log(data);
     return data;
   } catch (e) {
     console.log(e);

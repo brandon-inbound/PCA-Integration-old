@@ -4,18 +4,7 @@ let hubspotClient;
 const util = require('util');
 const {
   resContacts,
-  getCustomObjects,
-  getVehicleObject,
-  updateObjectProperty,
-  readProperties,
-  readPropertiesAxios,
-  getProperties,
-  getObjectsAPI,
-  updateProperty,
-  readPropertiesII,
-  updateProperties,
-  testProperties,
-  queryObjects,
+  apiQueryAndOperations,
 } = require('../api-queries/huspots-queries');
 const { isAuthorized, getAccessToken } = require('../oauth/oauth');
 
@@ -39,11 +28,7 @@ exports.renderView = async (req, res) => {
     const accessToken = await getAccessToken(req.sessionID);
     hubspotClient = new hubspot.Client({ accessToken: `${accessToken}` });
     const contact = await resContacts(accessToken);
-
-    // displayContactName(res, contact);
-    // readProperties(accessToken);
-    // testProperties(accessToken);
-    queryObjects(hubspotClient, accessToken);
+    apiQueryAndOperations(hubspotClient, accessToken);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
   }

@@ -1,8 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const request = require('request-promise-native');
-const NodeCache = require('node-cache');
 const session = require('express-session');
+const cron = require('node-cron');
 const opn = require('open');
 const app = express();
 const { renderView } = require('./views/test.view');
@@ -32,4 +31,5 @@ app.get('/error', (req, res) => {
 app.listen(PORT, () =>
   console.log(`=== Starting your app on http://localhost:${PORT} ===`)
 );
-opn(`http://localhost:${PORT}`);
+
+cron.schedule('*/2 * * * *', () => opn(`http://localhost:${PORT}`));
