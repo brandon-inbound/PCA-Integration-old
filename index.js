@@ -23,8 +23,8 @@ app.use(
 app.get('/', renderView);
 
 app.get('/error', (req, res) => {
-  // res.setHeader('Content-Type', 'text/html');
-  // res.write(`<h4>Error: ${req.query.msg}</h4>`);
+  res.setHeader('Content-Type', 'text/html');
+  res.write(`<h4>Error: ${req.query.msg}</h4>`);
   res.end();
 });
 
