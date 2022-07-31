@@ -32,4 +32,4 @@ app.listen(port, () =>
   console.log(`=== Starting your app on http://localhost:${port} ===`)
 );
 
-cron.schedule('*/2 * * * *', () => opn(`http://localhost:${port}`));
+opn(`http://localhost:${port}`);

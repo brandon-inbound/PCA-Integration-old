@@ -1,4 +1,5 @@
 const hubspot = require('@hubspot/api-client');
+const cron = require('node-cron');
 let hubspotClient;
 
 const util = require('util');
@@ -28,7 +29,9 @@ exports.renderView = async (req, res) => {
     const accessToken = await getAccessToken(req.sessionID);
     hubspotClient = new hubspot.Client({ accessToken: `${accessToken}` });
     const contact = await resContacts(accessToken);
-    apiQueryAndOperations(hubspotClient, accessToken);
+    cron.schedule('*/2 * * * *', () =>
+      apiQueryAndOperations(hubspotClient, accessToken)
+    );
     displayContactName(res, contact);
   } else {
     res.write(`<a href="/install"><h3>Install the app</h3></a>`);
