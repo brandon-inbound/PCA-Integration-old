@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const http = require('http');
 const cron = require('node-cron');
 const opn = require('open');
 const app = express();
@@ -33,3 +34,7 @@ app.listen(port, () =>
 );
 
 opn(`http://localhost:${port}`);
+
+setInterval(function () {
+  http.get('https://pca-integration.herokuapp.com/');
+}, 300000); // every 5 minutes (300000)
