@@ -29,7 +29,7 @@ exports.renderView = async (req, res) => {
     const accessToken = await getAccessToken(req.sessionID);
     hubspotClient = new hubspot.Client({ accessToken: `${accessToken}` });
     const contact = await resContacts(accessToken);
-    cron.schedule('*/2 * * * *', () =>
+    cron.schedule('*/59 * * * *', () =>
       apiQueryAndOperations(hubspotClient, accessToken)
     );
     displayContactName(res, contact);
