@@ -52,7 +52,8 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
         let progress = '';
         const total = +endDate - +startDate;
         const elaps = Date.now() - startDate;
-        progress = Math.round((elaps / total) * 100) + '%';
+        // progress = Math.round((elaps / total) * 100) + '%';
+        progress = Math.round((elaps / total) * 100);
         return progress;
       };
 

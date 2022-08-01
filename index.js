@@ -35,6 +35,7 @@ app.listen(port, () =>
 
 opn(`http://localhost:${port}`);
 
-setInterval(function () {
-  http.get('https://pca-integration.herokuapp.com/');
-}, 300000); // every 5 minutes (300000)
+// setInterval(function () {
+//   http.get('https://pca-integration.herokuapp.com/');
+//   console.log('Made an http call');
+// }, 300000); // every 5 minutes (300000)
