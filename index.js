@@ -5,6 +5,8 @@ const http = require('http');
 const cron = require('node-cron');
 const opn = require('open');
 const app = express();
+const axios = require('axios');
+
 const { renderView } = require('./views/test.view');
 const port = process.env.PORT || 3000;
 
@@ -39,3 +41,8 @@ opn(`http://localhost:${port}`);
 //   http.get('https://pca-integration.herokuapp.com/');
 //   console.log('Made an http call');
 // }, 300000); // every 5 minutes (300000)
+
+cron.schedule('*/10 * * * *', async () => {
+  const data = await axios.get('https://pca-integration.herokuapp.com');
+  console.log(data);
+});
