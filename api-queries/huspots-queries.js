@@ -49,12 +49,16 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
     for (res of apiResponse.results) {
       // console.log(res.properties);
       const getProgress = (startDate, endDate) => {
-        let progress = '';
+        let progress;
         const total = +endDate - +startDate;
         const elaps = Date.now() - startDate;
         // progress = Math.round((elaps / total) * 100) + '%';
         progress = Math.round((elaps / total) * 100);
-        return progress;
+        if (progress === Infinity) {
+          return (progress = 0);
+        } else {
+          return progress;
+        }
       };
 
       let contractStartDate = new Date(res.properties.date_de_debut_du_contrat);
@@ -68,7 +72,7 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
 
       // Contract Progress
       const contractProgress = getProgress(contractStartDate, contractEndDate);
-      console.log('Contract Progress: ', contractProgress);
+      console.log('Contract Progress: ', contractProgress) || 0;
 
       // Get month difference function
       const getMonthDifference = (startDate, endDate) => {
@@ -87,7 +91,7 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
       // Get projected Kilometers
       let projectedKMs =
         mileageStatement *
-        getMonthDifference(mileageStatementDate, contractEndDate);
+          getMonthDifference(mileageStatementDate, contractEndDate) || 0;
       console.log('This is the Projected Kilometers: ', projectedKMs);
 
       // Mileage gap between Contract KMs and Projected KMs
@@ -192,8 +196,8 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
 const updateProperty = async (
   id,
   accessToken,
-  contractProgress,
-  projectedKMs,
+  contractProgress = 0,
+  projectedKMs = 0,
   mileageGap = 0
 ) => {
   let payload = JSON.stringify({
