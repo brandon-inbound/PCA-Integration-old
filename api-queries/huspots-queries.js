@@ -63,6 +63,7 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
       };
 
       let contractStartDate = new Date(res.properties.date_de_debut_du_contrat);
+      console.log('Start date: ', res.properties.date_de_debut_du_contrat);
       let contractEndDate = new Date(res.properties.date_de_fin_du_contrat);
       let mileageStatementDate = new Date(
         res.properties.date_releve_kilometrage
@@ -108,6 +109,20 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
       let mileageGapInKMs = getDifference(totalPlannedMileage, projectedKMs);
       console.log('Mileage difference: ', mileageGapInKMs);
 
+      // Set end date by month duration
+      const endDateByDuration = (startDate, duration) => {
+        if (duration) {
+          let d = new Date(startDate);
+          d.setMonth(d.getMonth() + duration);
+          return d.toLocaleDateString('fr-CA');
+        } else {
+          return null;
+        }
+      };
+
+      let setEndDate = endDateByDuration(contractStartDate, contractDuration);
+      console.log('This is the end date: ', setEndDate);
+
       // Update Properties
       updateProperty(
         res.id,
@@ -115,7 +130,8 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
         contractProgress,
         projectedKMs,
         mileageGap,
-        mileageGapInKMs
+        mileageGapInKMs,
+        setEndDate
       );
     }
   } catch (e) {
@@ -131,14 +147,37 @@ const updateProperty = async (
   contractProgress = 0,
   projectedKMs = 0,
   mileageGap = 0,
-  mileageGapInKMs = 0
+  mileageGapInKMs = 0,
+  endDate
 ) => {
+  let p1 = {
+    avancement_du_contrat: `${contractProgress}`,
+    km_theorique_fin_de_contrat: `${projectedKMs}`,
+    ecart_kilometrage: `${mileageGap}`,
+    ecart_kilometrage_en_kms: `${mileageGapInKMs}`,
+  };
+  let p2 = {
+    date_de_fin_du_contrat: `${endDate}`,
+  };
+
+  let p3;
+
+  if (endDate) {
+    p3 = {
+      ...p1,
+      ...p2,
+    };
+  } else {
+    p3 = {
+      ...p1,
+    };
+  }
+
+  // console.log('Object: ', p3);
+
   let payload = JSON.stringify({
     properties: {
-      avancement_du_contrat: `${contractProgress}`,
-      km_theorique_fin_de_contrat: `${projectedKMs}`,
-      ecart_kilometrage: `${mileageGap}`,
-      ecart_kilometrage_en_kms: `${mileageGapInKMs}`,
+      ...p3,
     },
   });
   const config = {
