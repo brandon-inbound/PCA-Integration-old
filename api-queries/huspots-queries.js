@@ -100,7 +100,7 @@ exports.apiQueryAndOperations = async (hubspotClient, accessToken) => {
         ((projectedKMs - totalPlannedMileage) / totalPlannedMileage) * 40;
       const preMileageGap =
         calcMileageGap - (mileageStatement / totalPlannedMileage) * 100;
-      const mileageGap = parseFloat(preMileageGap.toFixed(0)) || 0;
+      const mileageGap = parseFloat(calcMileageGap.toFixed(0)) || 0;
       console.log('Mileage gap: ', mileageGap);
 
       // Get mileage gap in kms
