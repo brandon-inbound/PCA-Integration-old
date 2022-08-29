@@ -43,6 +43,6 @@ opn(`http://localhost:${port}`);
 // }, 300000); // every 5 minutes (300000)
 
 cron.schedule('*/10 * * * *', async () => {
-  const data = await axios.get('https://pca-integration.herokuapp.com');
+  const data = await axios.get('https://pca-integration.vercel.app/');
   console.log(data);
 });
